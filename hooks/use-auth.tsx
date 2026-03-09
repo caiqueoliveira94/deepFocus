@@ -14,6 +14,7 @@ interface User {
 interface AuthContextType {
     user: User | null
     isLoading: boolean
+    isAuthenticating: boolean
     login: (email: string, password: string) => Promise<{ error: any }>
     register: (name: string, email: string, password: string) => Promise<{ error: any }>
     logout: () => Promise<void>
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [isAuthenticating, setIsAuthenticating] = useState(false)
 
     const mapUser = (supabaseUser: SupabaseUser | null): User | null => {
         if (!supabaseUser) return null
@@ -35,7 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     useEffect(() => {
-        // Check active session
         supabase.auth.getSession().then(({ data: { session } }) => {
             const newUser = mapUser(session?.user ?? null)
             setUser(prev => {
@@ -58,22 +59,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [])
 
     const login = useCallback(async (email: string, password: string) => {
-        setIsLoading(true)
+        setIsAuthenticating(true)
         const { error } = await supabase.auth.signInWithPassword({ email, password })
-        setIsLoading(false)
+        setIsAuthenticating(false)
+
+        if (error) {
+            let message = error.message
+
+            if (error.message === "Invalid login credentials") {
+                message = "E-mail ou senha incorretos."
+            } else if (error.message === "Email not confirmed") {
+                message = "Para entrar, você precisa confirmar seu e-mail."
+            } else if (error.message === "Database error saving new user") {
+                message = "Houve um erro no servidor. Tente novamente mais tarde."
+            }
+
+            return { error: { ...error, message } }
+        }
+
         return { error }
     }, [])
 
     const register = useCallback(async (name: string, email: string, password: string) => {
-        setIsLoading(true)
-        const { error } = await supabase.auth.signUp({
+        setIsAuthenticating(true)
+
+        if (!email.includes("@")) {
+            setIsAuthenticating(false)
+            return { error: { message: "E-mail inválido." } }
+        }
+
+        if (password.length < 6) {
+            setIsAuthenticating(false)
+            return { error: { message: "A senha deve ter pelo menos 6 caracteres." } }
+        }
+
+        try {
+            const { data: existingProfile, error: checkError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', email)
+                .maybeSingle()
+
+            if (existingProfile) {
+                setIsAuthenticating(false)
+                return { error: { message: "Este e-mail já está em uso." } }
+            }
+
+            if (checkError && checkError.code !== 'PGRST116' && checkError.code !== '42P01') {
+                console.warn("Erro ao verificar usuário existente:", checkError)
+            }
+        } catch (err) {
+            console.error("Erro na pré-verificação de cadastro:", err)
+        }
+
+        const { error, data } = await supabase.auth.signUp({
             email,
             password,
             options: {
                 data: { name },
             },
         })
-        setIsLoading(false)
+
+        if (!error && data?.user && data.user.identities?.length === 0) {
+            setIsAuthenticating(false)
+            return { error: { message: "Este e-mail já está cadastrado. Tente fazer login." } }
+        }
+
+        setIsAuthenticating(false)
         return { error }
     }, [])
 
@@ -85,10 +137,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const contextValue = React.useMemo(() => ({
         user,
         isLoading,
+        isAuthenticating,
         login,
         register,
         logout
-    }), [user, isLoading, login, register, logout])
+    }), [user, isLoading, isAuthenticating, login, register, logout])
 
     return (
         <AuthContext.Provider value={contextValue}>

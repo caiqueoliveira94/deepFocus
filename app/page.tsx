@@ -189,7 +189,7 @@ export default function PomodoroPage() {
                 <span className="sr-only">Concluir</span>
               </Button>
             )}
-            
+
             <Sheet>
               <SheetTrigger asChild>
                 <Button
@@ -214,7 +214,7 @@ export default function PomodoroPage() {
             </Sheet>
           </div>
         </section>
-        
+
         <section className="hidden md:flex w-[400px] flex-col h-full overflow-hidden border-l border-border/50 pt-8 pl-8">
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {historyContent}

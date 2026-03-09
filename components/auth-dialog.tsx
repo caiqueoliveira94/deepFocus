@@ -26,18 +26,21 @@ import { LogIn, UserPlus, Loader2, User, LogOut, LayoutDashboard } from "lucide-
 import { useToast } from "@/hooks/use-toast"
 
 export function AuthDialog() {
-    const { user, login, register, logout, isLoading } = useAuth()
+    const { user, login, register, logout, isLoading, isAuthenticating } = useAuth()
     const { toast } = useToast()
     const [open, setOpen] = React.useState(false)
 
     const [email, setEmail] = React.useState("")
     const [password, setPassword] = React.useState("")
     const [name, setName] = React.useState("")
+    const [errorMsg, setErrorMsg] = React.useState<string | null>(null)
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
+        setErrorMsg(null)
         const { error } = await login(email, password)
         if (error) {
+            setErrorMsg(error.message)
             toast({
                 title: "Erro ao entrar",
                 description: error.message,
@@ -50,8 +53,10 @@ export function AuthDialog() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
+        setErrorMsg(null)
         const { error } = await register(name, email, password)
         if (error) {
+            setErrorMsg(error.message)
             toast({
                 title: "Erro ao cadastrar",
                 description: error.message,
@@ -108,7 +113,10 @@ export function AuthDialog() {
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(val) => {
+            setOpen(val)
+            if (!val) setErrorMsg(null)
+        }}>
             <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">
                     <LogIn className="h-4 w-4" />
@@ -130,6 +138,12 @@ export function AuthDialog() {
 
                     <TabsContent value="login">
                         <form onSubmit={handleLogin} className="space-y-4 pt-2">
+                            {errorMsg && (
+                                <div className="p-3 rounded-md bg-destructive/15 border border-destructive/20 text-destructive text-sm flex items-center gap-2 animate-in fade-in zoom-in duration-200">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+                                    {errorMsg}
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -151,8 +165,8 @@ export function AuthDialog() {
                                     required
                                 />
                             </div>
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading ? (
+                            <Button type="submit" className="w-full" disabled={isAuthenticating}>
+                                {isAuthenticating ? (
                                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                 ) : (
                                     <LogIn className="h-4 w-4 mr-2" />
@@ -164,6 +178,12 @@ export function AuthDialog() {
 
                     <TabsContent value="register">
                         <form onSubmit={handleRegister} className="space-y-4 pt-2">
+                            {errorMsg && (
+                                <div className="p-3 rounded-md bg-destructive/15 border border-destructive/20 text-destructive text-sm flex items-center gap-2 animate-in fade-in zoom-in duration-200">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+                                    {errorMsg}
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <Label htmlFor="name">Nome</Label>
                                 <Input
@@ -196,8 +216,8 @@ export function AuthDialog() {
                                     required
                                 />
                             </div>
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading ? (
+                            <Button type="submit" className="w-full" disabled={isAuthenticating}>
+                                {isAuthenticating ? (
                                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                 ) : (
                                     <UserPlus className="h-4 w-4 mr-2" />
