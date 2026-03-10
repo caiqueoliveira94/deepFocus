@@ -1,6 +1,6 @@
 "use client"
 
-import { Play, Pause, RotateCcw, Check, History } from "lucide-react"
+import { Play, Pause, RotateCcw, Check, History, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { TimerDisplay } from "@/components/timer-display"
@@ -108,7 +108,7 @@ export default function PomodoroPage() {
           )}
 
           <div className="flex justify-center gap-2 mb-8">
-            {[25, 35, 45].map((mins) => (
+            {[1, 35, 45].map((mins) => (
               <Button
                 key={mins}
                 variant={timeLeft === mins * 60 ? "default" : "outline"}
@@ -232,7 +232,16 @@ export default function PomodoroPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={discardSession}>Descartar</AlertDialogCancel>
-              <AlertDialogAction onClick={complete}>Salvar Tarefa</AlertDialogAction>
+              <AlertDialogAction onClick={complete} disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  "Salvar Tarefa"
+                )}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

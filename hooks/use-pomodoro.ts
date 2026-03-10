@@ -200,67 +200,72 @@ export function usePomodoro(defaultMinutes: number = 25) {
   const complete = useCallback(async () => {
     if (!taskName.trim() || !projectName.trim()) return
 
-    let totalElapsed = elapsedRef.current
-    if (startTimeRef.current) {
-      totalElapsed += Math.floor((Date.now() - startTimeRef.current) / 1000)
-    }
+    setIsLoading(true)
+    try {
+      let totalElapsed = elapsedRef.current
+      if (startTimeRef.current) {
+        totalElapsed += Math.floor((Date.now() - startTimeRef.current) / 1000)
+      }
 
-    const newTaskData = {
-      name: taskName,
-      projectName: projectName.trim(),
-      duration: totalElapsed,
-      completedAt: new Date().toISOString(),
-    }
+      const newTaskData = {
+        name: taskName,
+        projectName: projectName.trim(),
+        duration: totalElapsed,
+        completedAt: new Date().toISOString(),
+      }
 
-    if (user) {
-      const { data: insertedTask, error: taskError } = await supabase
-        .from('tasks')
-        .insert({
+      if (user) {
+        const { data: insertedTask, error: taskError } = await supabase
+          .from('tasks')
+          .insert({
+            user_id: user.id,
+            name: newTaskData.name,
+            project_name: newTaskData.projectName,
+            duration: newTaskData.duration,
+            completed_at: newTaskData.completedAt
+          })
+          .select()
+          .single()
+
+        if (!taskError && insertedTask) {
+          setTasks(prev => [{
+            id: insertedTask.id,
+            name: insertedTask.name,
+            projectName: insertedTask.project_name,
+            duration: insertedTask.duration,
+            completedAt: insertedTask.completed_at
+          }, ...prev])
+        }
+
+        await supabase.from('projects').upsert({
           user_id: user.id,
-          name: newTaskData.name,
-          project_name: newTaskData.projectName,
-          duration: newTaskData.duration,
-          completed_at: newTaskData.completedAt
+          name: newTaskData.projectName
+        }, { onConflict: 'user_id, name' })
+
+        setProjects(prev => {
+          if (prev.includes(newTaskData.projectName)) return prev
+          return [...prev, newTaskData.projectName]
         })
-        .select()
-        .single()
 
-      if (!taskError && insertedTask) {
-        setTasks(prev => [{
-          id: insertedTask.id,
-          name: insertedTask.name,
-          projectName: insertedTask.project_name,
-          duration: insertedTask.duration,
-          completedAt: insertedTask.completed_at
-        }, ...prev])
+      } else {
+        const newTask: Task = {
+          id: Date.now().toString(),
+          ...newTaskData
+        }
+        setTasks((prev) => [newTask, ...prev])
+        setProjects((prev) => {
+          if (prev.includes(newTaskData.projectName)) return prev
+          return [...prev, newTaskData.projectName]
+        })
       }
 
-      await supabase.from('projects').upsert({
-        user_id: user.id,
-        name: newTaskData.projectName
-      }, { onConflict: 'user_id, name' })
-
-      setProjects(prev => {
-        if (prev.includes(newTaskData.projectName)) return prev
-        return [...prev, newTaskData.projectName]
-      })
-
-    } else {
-      const newTask: Task = {
-        id: Date.now().toString(),
-        ...newTaskData
-      }
-      setTasks((prev) => [newTask, ...prev])
-      setProjects((prev) => {
-        if (prev.includes(newTaskData.projectName)) return prev
-        return [...prev, newTaskData.projectName]
-      })
+      setTaskName("")
+      setProjectName("")
+      setIsSessionComplete(false)
+      reset()
+    } finally {
+      setIsLoading(false)
     }
-
-    setTaskName("")
-    setProjectName("")
-    setIsSessionComplete(false)
-    reset()
   }, [taskName, projectName, user, reset])
 
   const discardSession = useCallback(() => {
