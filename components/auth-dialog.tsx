@@ -23,6 +23,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LogIn, UserPlus, Loader2, User, LogOut, LayoutDashboard } from "lucide-react"
+import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 
 export function AuthDialog() {
@@ -98,9 +99,11 @@ export function AuthDialog() {
                         </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem disabled className="cursor-not-allowed opacity-70">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        <span>Dashboard (Em breve)</span>
+                    <DropdownMenuItem asChild>
+                        <Link href="/dashboard" className="flex items-center cursor-pointer w-full">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Dashboard</span>
+                        </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout} className=" focus:text-destructive focus:bg-destructive/10 cursor-pointer dark:focus:text-destructive dark:focus:bg-destructive/10">

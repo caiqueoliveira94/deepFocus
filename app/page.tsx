@@ -108,7 +108,7 @@ export default function PomodoroPage() {
           )}
 
           <div className="flex justify-center gap-2 mb-8">
-            {[1, 35, 45].map((mins) => (
+            {[25, 35, 45].map((mins) => (
               <Button
                 key={mins}
                 variant={timeLeft === mins * 60 ? "default" : "outline"}

@@ -4,6 +4,17 @@ import { Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Task } from "@/hooks/use-pomodoro"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface TaskListProps {
   tasks: Task[]
@@ -81,14 +92,34 @@ export function TaskList({ tasks, onDelete, onClearAll, title = "Histórico", is
         <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
           {title}
         </h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClearAll}
-          className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-        >
-          Limpar tudo
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            >
+              Limpar tudo
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação irá excluir permanentemente todas as suas sessões registradas. Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onClearAll}
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              >
+                Limpar Histórico
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="space-y-2">
