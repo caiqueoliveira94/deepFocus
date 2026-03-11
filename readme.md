@@ -1,17 +1,35 @@
 # Deep Focus 🧘‍♂️ - Pomodoro & Task Management
 
-Bem-vindo ao **Deep Focus**, uma aplicação de produtividade moderna construída com **Next.js 15**, **Tailwind CSS** e **Supabase**. O app permite gerenciar seu tempo através do cronômetro Pomodoro, organizar tarefas por projetos e acompanhar seu histórico de produtividade.
+Bem-vindo ao **Deep Focus**, uma aplicação de produtividade moderna construída com **Next.js 16**, **Tailwind CSS 4** e **Supabase**. O app permite gerenciar seu tempo através do cronômetro Pomodoro, organizar tarefas por projetos e acompanhar seu histórico de produtividade com métricas detalhadas.
+
+---
+
+## ✨ Funcionalidades Principais
+
+- **⏱️ Timer Pomodoro Flexível**: Ciclos customizáveis para manter o foco total.
+- **📂 Organização por Projetos**: Categorize suas tarefas para uma gestão eficiente.
+- **📊 Dashboard de Métricas**: 
+  - Gráficos de atividade (7 dias, 30 dias, 12 meses).
+  - Distribuição de tempo por categoria (Pie Chart).
+  - Métricas de foco diário médio e sessões concluídas.
+- **📋 Histórico Inteligente**:
+  - Visão detalhada de cada sessão.
+  - Agregação por tarefa (tempo total acumulado).
+  - Filtros por nome de tarefa e por projeto.
+- **🔒 Segurança & Nuvem**: Persistência de dados com autenticação Supabase.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
 - **Linguagem**: [TypeScript](https://www.typescriptlang.org/)
 - **Estilização**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **Interface**: [Radix UI](https://www.radix-ui.com/) & [Lucide Icons](https://lucide.dev/)
+- **Interface**: [Radix UI](https://www.radix-ui.com/) (Shadcn UI) & [Lucide Icons](https://lucide.dev/)
+- **Gráficos**: [Recharts](https://recharts.org/)
+- **Manipulação de Datas**: [date-fns](https://date-fns.org/)
 - **Banco de Dados & Autenticação**: [Supabase](https://supabase.com/)
-- **Gerenciamento de Estado**: React Hooks customizados
+- **Gerenciamento de Estado**: Custom Hooks (React Context)
 
 ---
 
@@ -49,21 +67,18 @@ O projeto estará disponível em [http://localhost:3000](http://localhost:3000).
 
 ## 📍 Endpoints da Aplicação (Rotas)
 
-A aplicação utiliza o **Next.js App Router**. Como os dados são consumidos diretamente via SDK do Supabase no cliente, os principais endpoints são as rotas de página:
-
 | Rota | Descrição | Acesso |
 | :--- | :--- | :--- |
-| `/` | **Dashboard / Timer**: Cronômetro Pomodoro, criação de tarefas e visualização rápida do histórico recente. | Público |
-| `/tasks` | **Histórico Completo**: Lista detalhada de todas as sessões concluídas com paginação. | Restrito (Requer Login) |
-
-*Nota: A autenticação (Login/Cadastro) é gerenciada via modal (`AuthDialog`) diretamente na página principal.*
+| `/` | **Pomodoro Timer**: Cronômetro, criação de tarefas e widgets rápidos. | Público |
+| `/dashboard` | **Analytics & Insights**: Gráficos de atividade, métricas de foco e distribuição de projetos. | Restrito (Login) |
+| `/tasks` | **Histórico de Tarefas**: Lista detalhada de sessões filtráveis e paginadas. | Restrito (Login) |
 
 ---
 
 ## 📁 Estrutura de Pastas
 
-- `/app`: Definição das rotas e layouts da aplicação.
-- `/components`: Componentes reutilizáveis de UI e lógica visual.
-- `/hooks`: Hooks customizados para gerenciar o Timer e Autenticação.
-- `/lib`: Configurações de bibliotecas externas (Supabase client, Utils).
-- `/public`: Ativos estáticos (ícones, imagens).
+- `/app`: Rotas principais (Pages e Layouts).
+- `/components`: UI kit (Shadcn), timers, formulários e gráficos.
+- `/hooks`: Lógica de Pomodoro, Autenticação e Sincronização.
+- `/lib`: Configuração Supabase client e utilitários.
+- `/public`: Ativos visuais e ícones.
